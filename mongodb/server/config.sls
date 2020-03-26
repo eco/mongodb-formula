@@ -318,9 +318,11 @@ mongodb server {{ svc }} config clean:
   file.absent:
     - name: {{ mongodb.server[svc]['conf_path'] }}
 
+{% if 'schema' in mongodb.server[svc]['conf'] and 'path' in mongodb.server[svc]['conf']['schema'] %}
 mongodb server {{ svc }} schema path clean:
   file.absent:
     - name: {{ mongodb.server[svc]['conf']['schema']['path'] }}
+{% endif %}
 
 mongodb server {{ svc }} logrotate clean:
   file.absent:
