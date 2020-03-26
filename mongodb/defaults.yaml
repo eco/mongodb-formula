@@ -45,6 +45,7 @@ mongodb:
       shortcut: false
       package: mongodb-org-server
       conf_path: /etc/mongod.conf
+      enable: true
       conf:
         systemLog:
           logAppend: false
@@ -83,6 +84,7 @@ mongodb:
       shortcut: false
       package: mongodb-org-mongos
       conf_path: /etc/mongos.conf
+      enable: true
       conf:
         systemLog:
           destination: file

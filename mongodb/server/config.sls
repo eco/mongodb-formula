@@ -45,7 +45,7 @@ mongodb server tools pymongo package:
       - pkg: mongodb server tools pypip package
 
 {%- for svc in ('mongod', 'mongos',) %}
-
+{%- if mongodb.server[svc].enable %}
   {%- if "processManagement" in mongodb.server[svc]['conf'] and mongodb.server[svc]['conf']['processManagement']['pidFilePath'] %}
      {%- set pidpath = salt['file.dirname']( mongodb.server[svc]['conf']['processManagement']['pidFilePath']) %}
   {%- else %}
@@ -313,8 +313,39 @@ mongodb server {{ svc }} service running:
     - watch:
       - file: mongodb server {{ svc }} config
 
-     {%- if mongodb.server.shell.mongorc and loop.index == 1 %}
+{% else %}
+mongodb server {{ svc }} config clean:
+  file.absent:
+    - name: {{ mongodb.server[svc]['conf_path'] }}
 
+mongodb server {{ svc }} schema path clean:
+  file.absent:
+    - name: {{ mongodb.server[svc]['conf']['schema']['path'] }}
+
+mongodb server {{ svc }} logrotate clean:
+  file.absent:
+    - name: /etc/logrotate.d/mongodb_{{ svc }}
+
+mongodb server {{ svc }} launchd service file clean:
+  file.absent:
+    - name: /Library/LaunchAgents/org.mongo.mongodb.{{ svc }}.plist
+
+mongodb server {{ svc }} desktop shortcut clean:
+  file.absent:
+    - name: '{{ mongodb.userhome }}/{{ mongodb.system.user }}/Desktop/MongoDB ({{ svc }})'
+
+mongodb server {{ svc }} systemd service file:
+  file.absent:
+    - name: {{ mongodb.server[svc]['systemd']['file'] }}
+
+mongodb server {{ svc }} service not running:
+  service.dead:
+    - name: {{ mongodb.server[svc]['service'] }}
+    - enable: false
+{%- endif %}
+{%- endfor %}
+
+{%- if mongodb.server.shell.mongorc %}
 mongodb server shell etc mongorc add:
   file.managed:
     - name: {{ mongodb.server.shell.mongorc }}
@@ -329,6 +360,4 @@ mongodb server shell etc mongorc add:
         svc: {{ svc }}
     - require:
       - user: mongodb server user and group present
-
-     {%- endif %}
-{%- endfor %}
+{%- endif %}
