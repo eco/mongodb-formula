@@ -332,9 +332,11 @@ mongodb server {{ svc }} launchd service file clean:
   file.absent:
     - name: /Library/LaunchAgents/org.mongo.mongodb.{{ svc }}.plist
 
+{% if 'user' in mongodb.system %}
 mongodb server {{ svc }} desktop shortcut clean:
   file.absent:
-    - name: '{{ mongodb.userhome }}/{{ mongodb.system.user }}/Desktop/MongoDB ({{ svc }})'
+    - name: '{{ mongodb.system.userhome }}/{{ mongodb.system.user }}/Desktop/MongoDB ({{ svc }})'
+{% endif %}
 
 mongodb server {{ svc }} systemd service file:
   file.absent:
