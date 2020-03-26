@@ -313,6 +313,23 @@ mongodb server {{ svc }} service running:
     - watch:
       - file: mongodb server {{ svc }} config
 
+{%- if mongodb.server.shell.mongorc %}
+mongodb server shell etc mongorc add:
+  file.managed:
+    - name: {{ mongodb.server.shell.mongorc }}
+    - unless: test -f {{ mongodb.server.shell.mongorc }}
+    - user: {{ mongodb.server.user }}
+    - group: {{ mongodb.server.group }}
+    - mode: '0644'
+    - source: salt://mongodb/files/mongorc.js.jinja
+    - template: jinja
+    - makedirs: True
+    - context:
+        svc: {{ svc }}
+    - require:
+      - user: mongodb server user and group present
+{%- endif %}
+
 {% else %}
 mongodb server {{ svc }} config clean:
   file.absent:
@@ -348,20 +365,3 @@ mongodb server {{ svc }} service not running:
     - enable: false
 {%- endif %}
 {%- endfor %}
-
-{%- if mongodb.server.shell.mongorc %}
-mongodb server shell etc mongorc add:
-  file.managed:
-    - name: {{ mongodb.server.shell.mongorc }}
-    - unless: test -f {{ mongodb.server.shell.mongorc }}
-    - user: {{ mongodb.server.user }}
-    - group: {{ mongodb.server.group }}
-    - mode: '0644'
-    - source: salt://mongodb/files/mongorc.js.jinja
-    - template: jinja
-    - makedirs: True
-    - context:
-        svc: {{ svc }}
-    - require:
-      - user: mongodb server user and group present
-{%- endif %}
